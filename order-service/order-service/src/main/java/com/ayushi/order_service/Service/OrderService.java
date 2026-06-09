@@ -1,9 +1,11 @@
 package com.ayushi.order_service.Service;
 
 
+import com.ayushi.order_service.dto.OrderCreatedEvent;
 import com.ayushi.order_service.dto.ProductResponse;
 import com.ayushi.order_service.Entity.Order;
 import com.ayushi.order_service.Repository.OrderRepository;
+import com.ayushi.order_service.kafka.OrderProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,7 +18,11 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
+    private final OrderProducer orderProducer;
+
+
     public Order createOrder(Order order) {
+
 
         ProductResponse product =
                 restTemplate.getForObject(
@@ -49,12 +55,30 @@ public class OrderService {
                 null
         );
 
+//        order.setTotalPrice(
+//                product.getPrice() * order.getQuantity()
+//        );
+//
+//        return orderRepository.save(order);
+
         order.setTotalPrice(
                 product.getPrice() * order.getQuantity()
         );
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        orderProducer.publish(
+                new OrderCreatedEvent(
+                        savedOrder.getId(),
+                        savedOrder.getProductId(),
+                        savedOrder.getQuantity()
+                )
+        );
+
+        return savedOrder;
+
     }
+
 
 
     public List<Order> getAllOrders() {
