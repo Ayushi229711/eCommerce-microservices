@@ -33,6 +33,10 @@ public class InventoryService {
                         .orElseThrow(() ->
                                 new RuntimeException("Product not found"));
 
+        if (inventory.getQuantity() < quantity) {
+            throw new RuntimeException("Insufficient stock");
+        }
+
         inventory.setQuantity(
                 inventory.getQuantity() - quantity
         );
