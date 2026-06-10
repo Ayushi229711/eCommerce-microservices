@@ -64,6 +64,7 @@ public class OrderService {
         order.setTotalPrice(
                 product.getPrice() * order.getQuantity()
         );
+        order.setStatus("PENDING");
 
         Order savedOrder = orderRepository.save(order);
 

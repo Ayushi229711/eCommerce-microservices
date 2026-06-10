@@ -22,4 +22,6 @@ public class Order {
     private Integer quantity;
 
     private Double totalPrice;
+
+    private String status;
 }
